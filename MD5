@@ -1,0 +1,9 @@
+c8675253488fffac6ce31802adf8508c *DESCRIPTION
+c00a56ab2cd9f42d6093d90902bb6ca4 *LICENSE
+c1ac58247284a1b48282cee2fd037b75 *NAMESPACE
+c510858a2133bf533c1f61bfa48964e9 *R/hub_download.R
+800a7b7291d78ab44afed36380b82f56 *README.md
+0a0fc6912d3ec81445de059a6a6e0e77 *man/WEIGHTS_NAME.Rd
+897cc4fefb320a17d5edb68012568a0c *man/hub_download.Rd
+c85fb8907959efec8f948eefc70954a0 *tests/testthat.R
+4b4d24a049b4158cf67a4fed97e25e57 *tests/testthat/test-hub_download.R
