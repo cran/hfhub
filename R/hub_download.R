@@ -8,7 +8,8 @@
 #' @param force_download For re-downloading of files that are cached.
 #' @param ... currenytly unused.
 #'
-#' @returns The file path of the downloaded or cached file.
+#' @returns The file path of the downloaded or cached file. The snapshot path is returned
+#'   as an attribute.
 #' @examples
 #' try({
 #' withr::with_envvar(c(HUGGINGFACE_HUB_CACHE = tempdir()), {
@@ -142,12 +143,13 @@ hub_download <- function(repo_id, filename, ..., revision = "main", repo_type = 
         type = "download",
       )
       progress <- function(down, up) {
-        if (down[1] !=0) {
+        if (down[1] != 0) {
           cli::cli_progress_update(total = down[1], set = down[2], id = bar_id)
         }
         TRUE
       }
       handle <- curl::new_handle(noprogress = FALSE, progressfunction = progress)
+      curl::handle_setheaders(handle, .list = hub_headers())
       curl::curl_download(url, tmp, handle = handle, quiet = FALSE)
       cli::cli_progress_done(id = bar_id)
     }, error = function(err) {
@@ -156,6 +158,7 @@ hub_download <- function(repo_id, filename, ..., revision = "main", repo_type = 
     fs::file_move(tmp, blob_path)
 
     # fs::link_create doesn't work for linking files on windows.
+    try(fs::file_delete(pointer_path), silent = TRUE) # delete the link to avoid warnings
     file.symlink(blob_path, pointer_path)
   })
 
@@ -163,12 +166,17 @@ hub_download <- function(repo_id, filename, ..., revision = "main", repo_type = 
 }
 
 hub_url <- function(repo_id, filename, ..., revision = "main", repo_type = "model") {
-  glue::glue("https://huggingface.co/{repo_id}/resolve/{revision}/{filename}")
+  if (repo_type == "model") {
+    glue::glue("https://huggingface.co/{repo_id}/resolve/{revision}/{filename}")
+  } else {
+    glue::glue("https://huggingface.co/{repo_type}s/{repo_id}/resolve/{revision}/{filename}")
+  }
 }
 
 get_pointer_path <- function(storage_folder, revision, relative_filename) {
-  snapshot_path <- fs::path(storage_folder, "snapshots")
-  pointer_path <- fs::path(snapshot_path, revision, relative_filename)
+  snapshot_path <- fs::path(storage_folder, "snapshots", revision)
+  pointer_path <- fs::path(snapshot_path, relative_filename)
+  attr(pointer_path, "snapshot_path") <- snapshot_path
   pointer_path
 }
 
@@ -177,12 +185,30 @@ repo_folder_name <- function(repo_id, repo_type = "model") {
   glue::glue("{repo_type}s{REPO_ID_SEPARATOR()}{repo_id}")
 }
 
+hub_headers <- function() {
+  headers <- c("user-agent" = "hfhub/0.0.1")
+
+  token <- Sys.getenv("HUGGING_FACE_HUB_TOKEN", unset = "")
+  if (!nzchar(token))
+    token <- Sys.getenv("HUGGINGFACE_HUB_TOKEN", unset = "")
+
+  if (nzchar(token)) {
+    headers["authorization"] <- paste0("Bearer ", token)
+  }
+
+  headers
+}
+
 #' @importFrom rlang %||%
 get_file_metadata <- function(url) {
+
+  headers <- hub_headers()
+  headers["Accept-Encoding"] <- "identity"
+
   req <- reqst(httr::HEAD,
     url = url,
     httr::config(followlocation = FALSE),
-    httr::add_headers("Accept-Encoding" = "identity", "user-agent" = "hfhub/0.0.1"),
+    httr::add_headers(.headers = headers),
     follow_relative_redirects = TRUE
   )
   list(

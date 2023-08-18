@@ -1,6 +1,6 @@
 Package: hfhub
 Title: Hugging Face Hub Interface
-Version: 0.1.0
+Version: 0.1.1
 Authors@R: c(
     person("Daniel", "Falbel", , "daniel@posit.co", role = c("aut", "cre")),
     person(family = "Posit", role = c("cph"))
@@ -15,9 +15,9 @@ Suggests: testthat (>= 3.0.0), jsonlite
 Config/testthat/edition: 3
 URL: https://mlverse.github.io/hfhub/
 NeedsCompilation: no
-Packaged: 2023-06-26 11:09:07 UTC; dfalbel
+Packaged: 2023-08-18 19:06:18 UTC; dfalbel
 Author: Daniel Falbel [aut, cre],
   Posit [cph]
 Maintainer: Daniel Falbel <daniel@posit.co>
 Repository: CRAN
-Date/Publication: 2023-06-28 13:50:09 UTC
+Date/Publication: 2023-08-18 19:22:33 UTC

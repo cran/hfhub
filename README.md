@@ -32,3 +32,9 @@ library(hfhub)
 path <- hub_download("gpt2", "config.json")
 str(jsonlite::fromJSON(path))
 ```
+
+## Authentication
+
+You can set the `HUGGING_FACE_HUB_TOKEN` environment variable with the value
+of a token obtained in the Access Token section of the Hugging Face account setting page. 
+This will allow you to download private files from Hugging Face Hub.
